@@ -1,8 +1,7 @@
 exports.handler = async (event) => {
-    // TODO implement
-    const response = {
-        statusCode: 200,
-        body: JSON.stringify('Hello from Lambda!'),
-    };
-    return response;
+    console.log(JSON.stringify(event));
+    for (const record of event.Records) {
+        const data = JSON.parse(Buffer.from(record.kinesis.data, 'base64'));
+        console.log('archive: ', data)
+    }
 };

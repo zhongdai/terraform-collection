@@ -123,6 +123,20 @@ resource "aws_lambda_function" "consumer-realtime" {
   role = aws_iam_role.data-stream-system-role.arn
 }
 
+resource "aws_lambda_event_source_mapping" "source-mapping-realtime" {
+  event_source_arn  = aws_kinesis_stream.json-data-stream.arn
+  function_name     = aws_lambda_function.consumer-realtime.arn
+  starting_position = "LATEST"
+}
+
+resource "aws_lambda_permission" "allow-kinesis-consumer-realtime" {
+  statement_id  = "AllowExecutionFromKinesis"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.consumer-realtime.arn
+  principal     = "kinesis.amazonaws.com"
+  source_arn    = aws_kinesis_stream.json-data-stream.arn
+}
+
 resource "aws_lambda_function" "consumer-archive" {
   function_name = "consumer-archive"
   filename      = "consumer-archive.zip"
@@ -133,6 +147,20 @@ resource "aws_lambda_function" "consumer-archive" {
   source_code_hash = data.archive_file.lambda-consumer-archive.output_base64sha256
 
   role = aws_iam_role.data-stream-system-role.arn
+}
+
+resource "aws_lambda_event_source_mapping" "source-mapping-archive" {
+  event_source_arn  = aws_kinesis_stream.json-data-stream.arn
+  function_name     = aws_lambda_function.consumer-archive.arn
+  starting_position = "LATEST"
+}
+
+resource "aws_lambda_permission" "allow-kinesis-consumer-archive" {
+  statement_id  = "AllowExecutionFromKinesis"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.consumer-archive.arn
+  principal     = "kinesis.amazonaws.com"
+  source_arn    = aws_kinesis_stream.json-data-stream.arn
 }
 
 # bucket permission to invoke lambda
